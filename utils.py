@@ -16,6 +16,7 @@ def judge(tags, r):
 
 
 def extract_relation(pipeline, text, r, t):
+    relation = {1: 'per:schools_attended', 2: 'per:employee_or_member_of', 3: 'per:cities_of_residence', 4: 'org:top_members_employees'}
     ner_text = pipeline.annotate(text, annotators = annotators_ner)
     res = set()
     for sentence in ner_text.sentence:
@@ -29,7 +30,7 @@ def extract_relation(pipeline, text, r, t):
             kbp_sentence = pipeline.annotate(s, annotators = annotators_kbp)
             for sen in kbp_sentence.sentence:
                 for rel in sen.kbpTriple:
-                    if rel.confidence > t:
+                    if rel.confidence > t and rel.relation == relation[r]:
                         res.add(((rel.subject, rel.relation, rel.object), rel.confidence))
     return res
 

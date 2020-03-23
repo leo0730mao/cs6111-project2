@@ -31,12 +31,11 @@ if __name__ == '__main__':
     queried_tuple = set()
 
     # Loop until have more than k tuples
-    while True:
-        with CoreNLPClient(timeout = 300000, memory = '4G') as pipeline:
+    with CoreNLPClient(timeout = 300000, memory = '4G') as pipeline:
+        while True:
             # step 2: query for top-10 webpages for current query q
             res = google_search(api_key, engine_id, q)
-
-            for webpage in res['items']:
+            for idx, webpage in enumerate(res['items']):
                 if webpage['formattedUrl'] not in processed_page:
                     processed_page.add(webpage['formattedUrl'])
                     try:
@@ -44,17 +43,23 @@ if __name__ == '__main__':
                     except:
                         html = None
                     if html is not None:
-                        text = BeautifulSoup(html, 'html.parser').get_text()[:20000]
+                        soup = BeautifulSoup(html, 'html.parser')
+                        for script in soup(['script', "style"]):
+                            script.decompose()
+                        text = soup.get_text()[:20000]
                         relations = extract_relation(pipeline, text, r, t)
                         for item in relations:
-                            if item[0] in x and item[1] > x[item[0]]:
+                            if item[0] not in x:
                                 x[item[0]] = item[1]
-        sorted_x = sorted(x.items(), key = lambda item: item[1])
-        if len(sorted_x) >= k:
-            print([item[0] for item in sorted_x[:k]])
-            exit(0)
-        else:
-            for item in sorted_x:
-                if item[0] not in queried_tuple:
-                    q = item[0][0] + " " + item[0][2]
-                    queried_tuple.add(item[0])
+                            elif item[0] in x and item[1] > x[item[0]]:
+                                x[item[0]] = item[1]
+                print("Complete %s-th webpage, now we have %s tuples" % (idx + 1, len(x)))
+            sorted_x = sorted(x.items(), key = lambda item: item[1])
+            if len(sorted_x) >= k:
+                print([item[0] for item in sorted_x[:k]])
+                exit(0)
+            else:
+                for item in sorted_x:
+                    if item[0] not in queried_tuple:
+                        q = item[0][0] + " " + item[0][2]
+                        queried_tuple.add(item[0])
