@@ -23,7 +23,7 @@ if __name__ == '__main__':
     print(now.strftime("%d/%m/%Y %H:%m:%s\n"))
 
 #    api_key = "AIzaSyCRnG7OG9U5R7nobD1VQvhxoc33mYmr08g"
-#    engine_id = "015777630004812292025:fvvd1zkgpmv"
+#    engine_id = ""015777630004812292025:fvvd1zkgpmv""
 #    r = 1
 #    t = 0.5
 #    q = "bill Gates microsoft"
@@ -52,13 +52,13 @@ if __name__ == '__main__':
             res = google_search(api_key, engine_id, q)
             for idx, webpage in enumerate(res['items']):
                 if webpage['formattedUrl'] not in processed_page:
+                    print("URL %d: %s" % (idx + 1, webpage['formattedUrl']))
                     processed_page.add(webpage['formattedUrl'])
                     try:
                         html = urlopen(webpage['formattedUrl']).read()
                     except:
                         html = None
                     if html is not None:
-                        print("URL (%d / %d): %s" % (idx + 1, k, webpage['formattedUrl']))
                         soup = BeautifulSoup(html, 'html.parser')
                         for script in soup(['script', "style"]):
                             script.decompose()
