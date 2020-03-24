@@ -4,31 +4,46 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from stanfordnlp.server import CoreNLPClient
 from utils import extract_relation, google_search
+from datetime import datetime
 
 os.environ["CORENLP_HOME"] = "/Users/maoyue/Desktop/stanford-corenlp-full-2018-10-05/"
 
 
 if __name__ == '__main__':
-    # if len(sys.argv) != 7:
-    #    print("main <google api key> <google engine id> <r> <t> <q> <k>")
-    #    exit(1)
-    # api_key = sys.argv[1]
-    # engine_id = sys.argv[2]
-    # r = int(sys.argv[3])
-    # t = float(sys.argv[4])
-    # q = sys.argv[5]
-    # k = int(sys.argv[6])
+    if len(sys.argv) != 7:
+        print("main <google api key> <google engine id> <r> <t> <q> <k>")
+        exit(1)
+    api_key = sys.argv[1]
+    engine_id = sys.argv[2]
+    r = int(sys.argv[3])
+    t = float(sys.argv[4])
+    q = sys.argv[5]
+    k = int(sys.argv[6])
+    now = datetime.now()
+    print(now.strftime("%d/%m/%Y %H:%m:%s\n"))
 
-    api_key = "AIzaSyCRnG7OG9U5R7nobD1VQvhxoc33mYmr08g"
-    engine_id = "015777630004812292025:fvvd1zkgpmv"
-    r = 1
-    t = 0.5
-    q = "bill Gates microsoft"
-    k = 5
+#    api_key = "AIzaSyCRnG7OG9U5R7nobD1VQvhxoc33mYmr08g"
+#    engine_id = "015777630004812292025:fvvd1zkgpmv"
+#    r = 1
+#    t = 0.5
+#    q = "bill Gates microsoft"
+#    k = 5
+    
+    print("run <APIKey> <EngineID> %d %d %s %d" % (r, t, q, k))
+    
 
     x = dict()
     processed_page = set()
     queried_tuple = set()
+    
+    print()
+    print("Parameters:")
+    print("Client key = %s" % api_key)
+    print("Engine key = %s" % engine_id)
+    print("Relation per:schools_attended")
+    print("Threshold = %d" % t)
+    print("Query = %s" % q)
+    print("Number of tuples = %d" % k)
 
     # Loop until have more than k tuples
     with CoreNLPClient(timeout = 300000, memory = '4G') as pipeline:
@@ -43,6 +58,7 @@ if __name__ == '__main__':
                     except:
                         html = None
                     if html is not None:
+                        print("URL (%d / %d): %s" % (idx + 1, k, webpage['formattedUrl']))
                         soup = BeautifulSoup(html, 'html.parser')
                         for script in soup(['script', "style"]):
                             script.decompose()
